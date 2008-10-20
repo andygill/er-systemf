@@ -1,0 +1,28 @@
+Name:                er-system
+Version:             0.1
+Synopsis:            An Implementation of System-F, and combinators for rewriting it.
+Description:	     An Implementation of System-F, and combinators for rewriting it.
+Category:            Language
+License:             BSD3
+License-file:        LICENSE
+Author:              Andy Gill
+Maintainer:          Andy Gill <andygill@ku.edu>
+Stability:	     alpha
+build-type: 	     Simple
+Cabal-Version:       >= 1.2
+
+Library
+  Build-Depends:        base, er-rewrite, parsec >= 3.0, marked-pretty
+  Exposed-modules:
+      Language.SystemF.Syntax
+      Language.SystemF.Parser
+      Language.SystemF.Pretty
+      Language.SystemF.Subst
+      Language.SystemF.Eval
+--      Language.SystemF.Rewrite
+
+--Executable test
+--  Main-Is:        Main.hs
+--  Hs-Source-Dirs: ., test
+--  buildable: False
+
