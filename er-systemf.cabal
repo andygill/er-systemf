@@ -1,7 +1,7 @@
 Name:                er-system
 Version:             0.1
-Synopsis:            An Implementation of System-F, and combinators for rewriting it.
-Description:	     An Implementation of System-F, and combinators for rewriting it.
+Synopsis:            A KURE-enabled Implementation of System-F.
+Description:	     A KURE-enabled Implementation of System-F.
 Category:            Language
 License:             BSD3
 License-file:        LICENSE
@@ -9,20 +9,22 @@ Author:              Andy Gill
 Maintainer:          Andy Gill <andygill@ku.edu>
 Stability:	     alpha
 build-type: 	     Simple
-Cabal-Version:       >= 1.2
+Cabal-Version:       >= 1.6
 
 Library
-  Build-Depends:        base, er-rewrite, parsec >= 3.0, marked-pretty
+  Build-Depends:        base, kure >= 0.2.4, kure-your-boilerplate >= 0.1.2, parsec >= 3.0, marked-pretty
   Exposed-modules:
       Language.SystemF.Syntax
+      Language.SystemF.Rewrite
       Language.SystemF.Parser
       Language.SystemF.Pretty
       Language.SystemF.Subst
       Language.SystemF.Eval
 --      Language.SystemF.Rewrite
 
---Executable test
---  Main-Is:        Main.hs
---  Hs-Source-Dirs: ., test
---  buildable: False
+Executable test
+  Build-Depends:        base, kure >= 0.2.4, kure-your-boilerplate >= 0.1.2, parsec >= 3.0, marked-pretty
+  Main-Is:        Main.hs
+  Hs-Source-Dirs: ., test
+  buildable: True
 

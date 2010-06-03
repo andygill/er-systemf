@@ -1,3 +1,17 @@
+-- |
+-- Module: Language.SystemF.Syntax 
+-- Copyright: (c) 2009 Andy Gill
+-- License: BSD3
+--
+-- Maintainer: Andy Gill <andygill@ku.edu>
+-- Stability: unstable
+-- Portability: ghc
+--
+-- This is a simple rendition of SystemF extended with let and case. It follows
+-- the GHC Core syntax closely.
+--
+-- Intentually, it really simple; Names and Lit's are just Strings.
+
 module Language.SystemF.Syntax where
 
 type Name = String	-- lower case
@@ -30,5 +44,6 @@ type TypeEnv = [(Name,Type)]
 data Pat = Pat Lit [(Name,Type)]
            deriving Show
 
-data Program = Program TypeEnv [Binding]
+data Program = Program TypeEnv [Binding]        -- The list of bindings are 
+           deriving Show
 

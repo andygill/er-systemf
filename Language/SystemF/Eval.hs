@@ -87,6 +87,5 @@ testE example = do
 
 -- t = testE "reverse @ (I) (Cons 1 (Cons 2 (Cons 3 Nil)))"
 
-
 -}
 

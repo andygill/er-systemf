@@ -7,8 +7,6 @@ import Data.Char
 import Data.List
 import Control.Monad
 import Data.Maybe
--- TODO: RM
-type P a = Parser a
 
 ------------------------------------------------------------------------------
 
@@ -90,6 +88,7 @@ parseNameWithType = (do
 parseAExp :: Parser Exp
 parseAExp = 
        (liftM Var parseName)
+   <|> (liftM Lit parseLit)
    <|> (do symbol '(' ; e <- parseExp ; symbol ')' ; return e)
 
 parseType :: Parser Type
@@ -163,15 +162,15 @@ parseParens p = do
 
 ------------------------------------------------------------------------------
 
-whiteSpace :: P ()
+whiteSpace :: Parser ()
 whiteSpace = skipMany (P.space <|> comment)
   where
     comment = try  (P.string "--" >> many (noneOf "\n") >> P.char '\n')
 
-lexeme :: P a -> P a 
+lexeme :: Parser a -> Parser a 
 lexeme p = do { r <- try p; whiteSpace; return r }
 
-primParseName :: P String
+primParseName :: Parser String
 primParseName = do c <- satisfy first
                    cs <- many $ satisfy rest
                    if (c:cs) `elem` keywords 
@@ -182,7 +181,7 @@ primParseName = do c <- satisfy first
     first c = isLower c || c == '_'
     rest  c = first c || isDigit c || isUpper c
 
-primParseContextName :: P String
+primParseContextName :: Parser String
 primParseContextName = do c <- P.char '$'
                           cs <- many1 $ satisfy rest
                           if (c:cs) `elem` keywords 
@@ -192,7 +191,7 @@ primParseContextName = do c <- P.char '$'
   where 
    rest  c = isLower c || isDigit c || isUpper c
 
-primParseLit :: P String
+primParseLit :: Parser String
 primParseLit = (do c <- satisfy first
                    cs <- many $ satisfy rest
                    return $ c : cs)
@@ -202,7 +201,7 @@ primParseLit = (do c <- satisfy first
     rest  c = first c || isDigit c || isLower c || c == '_'
 
 symChars = "!#$%^&*-_+=|<>.?/'"
-keywords = ["case","of","let","in","forall"]	-- ids that are now allowed as ids
+keywords = ["case","of","let","in","forall"]	-- ids that are not allowed as ids
 symbols  = ["="]			        -- symbolic names that are also not allowed
 
 

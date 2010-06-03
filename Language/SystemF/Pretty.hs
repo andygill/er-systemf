@@ -8,45 +8,63 @@ type Doc = MDoc (Scope Markup)
 
 data Scope a = Open a | Close a
 
-data Markup = Keyword | Symbol | Edge Int
+data Markup = Keyword | Symbol | Comment | Edge Int
+
+
+------------------------------------------------------------------------------
+
+scope :: Markup -> Doc -> Doc
+scope m d = mark (Open m) <> d <> mark (Close m)
+
+keyword :: String -> Doc
+keyword = scope Keyword . text 
+
+symbol :: String -> Doc
+symbol = scope Symbol . text 
+
+comment :: String -> Doc
+comment = scope Comment . text 
+
+------------------------------------------------------------------------------
+
 
 pprintExp :: Exp -> Doc
 pprintExp (Var name) = text name
 pprintExp (Lit lit)   = pprintLit lit
 pprintExp (App e1 e2) = pprintApp e1 [Right e2]
 pprintExp (APP e1 t)  = pprintApp e1 [Left t]
-pprintExp (Lam nm t exp)  = sep [ text "\\" 
+pprintExp (Lam nm t exp)  = sep [ symbol "\\" 
                                   <+> text nm 
-                                  <+> text "::" 
+                                  <+> symbol "::" 
                                   <+> pprintType t 
-                                  <+> text "->"
+                                  <+> symbol "->"
                                 , pprintExp exp 
                                 ]
-pprintExp (LAM nm exp)  = sep [ text "/\\" <+> text nm <+> text "->" 
+pprintExp (LAM nm exp)  = sep [ symbol "/\\" <+> text nm <+> symbol "->" 
                                       , pprintExp exp
                                       ]
-pprintExp (Let binds exp) = (vcat [ text "let" <+> pprintBinding binds
-                                        , text "in" <+> pprintExp exp
+pprintExp (Let binds exp) = (vcat [ keyword "let" <+> pprintBinding binds
+                                        , keyword "in" <+> pprintExp exp
                                         ])
-pprintExp (Case e alts def) = vcat [ text "case" <+> pprintExp e <+> text "of" 
-                                   , nest 2 $ vcat ( all_alts ++ [ text "}" ])
+pprintExp (Case e alts def) = vcat [ keyword "case" <+> pprintExp e <+> keyword "of" 
+                                   , nest 2 $ vcat ( all_alts ++ [ symbol "}" ])
                                    ]
   where
-    all_alts = [ text [start] <+> text cons <+> (sep (map ppBind binders)) <+> text "->" <+> pprintExp e
+    all_alts = [ symbol [start] <+> text cons <+> (sep (map ppBind binders)) <+> symbol "->" <+> pprintExp e
                | (start,(Pat cons binders,e)) <- zip ('{' : repeat ';') alts
                ] ++
-               [ text ";" <+> text "_" <+> text "->" <+> pprintExp d
+               [ symbol ";" <+> text "_" <+> symbol "->" <+> pprintExp d
                | d <- maybeToList def
                ]
 
-    ppBind (n,e) = parens $ text n <> text "::" <> pprintType e
+    ppBind (n,e) = parens $ text n <> symbol "::" <> pprintType e
 pprintExp e = error (show e)
                               
 
 pprintApp (App e1 e2) args = pprintApp e1 (Right e2 : args)
 pprintApp (APP e1 t) args  = pprintApp e1 (Left t : args)
 pprintApp atom       args  = pprintAtom atom <+> (sep (map pprintArgOrType args))
-pprintArgOrType (Left t)  = text "<" <> pprintAtomicType t <> text ">"
+pprintArgOrType (Left t)  = symbol "<" <> pprintAtomicType t <> symbol ">"
 pprintArgOrType (Right e) = pprintAtom e
 
 pprintAtom e | isAtom e  = pprintExp e
@@ -61,23 +79,23 @@ pprintAtomicType t@(TyVar nm) = pprintType t
 pprintAtomicType t = parens (pprintType t)
 
 pprintType (TyCon lit [])  = pprintLit lit
-pprintType (TyCon "->" [t1,t2]) = pprintAtomicType t1 <+> text "->" <+> pprintType t2
+pprintType (TyCon "->" [t1,t2]) = pprintAtomicType t1 <+> symbol "->" <+> pprintType t2
 pprintType (TyCon lit tys) = pprintLit lit <+> (sep (map pprintAtomicType tys))
-pprintType (TyForAll nm ty)  = text "forall" <+> text nm <+> text "." <+> pprintType ty
+pprintType (TyForAll nm ty)  = keyword "forall" <+> text nm <+> symbol "." <+> pprintType ty
 pprintType (TyVar nm)      = text nm
 
 pprintLit lit = text lit
 
 pprintBind :: Bind -> Doc
-pprintBind (name,(ty,rhs)) = nest 2 $ sep [ text name <+> text "::" <+> pprintType ty <+> text "="
-                                          , pprintExp rhs <> text ";"
+pprintBind (name,(ty,rhs)) = nest 2 $ sep [ text name <+> symbol "::" <+> pprintType ty <+> symbol "="
+                                          , pprintExp rhs <> symbol ";"
                                           ]
 
 pprintBinding :: Binding -> Doc
 pprintBinding (NonRecBinding bind) = pprintBind bind
-pprintBinding (RecBindings binds)  = (vcat $ [ text "-- rec group"
+pprintBinding (RecBindings binds)  = (vcat $ [ comment "-- rec group"
                                               ] ++ map pprintBind binds ++
-                                             [ text "-- end rec group"
+                                             [ comment  "-- end rec group"
                                              ])
 
 
